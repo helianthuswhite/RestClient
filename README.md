@@ -1,2 +1,2 @@
 # RestClient
-Flexible HTTP Client based on axios.
+Restful HTTP Client for broswer.

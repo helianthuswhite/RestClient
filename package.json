@@ -1,6 +1,6 @@
 {
-  "name": "restclient",
-  "version": "1.0.0",
+  "name": "@baiducloud/restclient",
+  "version": "0.0.1-alpha",
   "description": "Restful HTTP Client for broswer.",
   "main": "src",
   "scripts": {
@@ -28,6 +28,7 @@
     "eslint-plugin-import": "^2.14.0",
     "rollup": "^0.63.4",
     "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-eslint": "^5.0.0",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-uglify": "^6.0.0"
   }

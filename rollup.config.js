@@ -5,10 +5,10 @@ import uglify from 'rollup-plugin-uglify';
 import {eslint} from 'rollup-plugin-eslint';
 
 export default {
-    input: 'index.js',
+    input: 'src/client.js',
     output: {
-        file: 'restclient.min.js',
-        format: 'cjs'
+        file: 'index.js',
+        format: 'amd'
     },
     plugins: [
         resolve(),

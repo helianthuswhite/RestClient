@@ -1,8 +1,8 @@
 {
   "name": "@baiducloud/restclient",
-  "version": "0.0.1-alpha",
+  "version": "0.0.3-alpha",
   "description": "Restful HTTP Client for broswer.",
-  "main": "src",
+  "main": "index.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"

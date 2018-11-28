@@ -132,10 +132,6 @@ export default class Ajax {
                 try {
                     xhr.responseType = options.responseType;
                 } catch (e) {
-                    /* eslint-disable */
-                    // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-                    // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-                    /* eslint-enable */
                     if (options.responseType !== 'json') {
                         throw e;
                     }

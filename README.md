@@ -87,7 +87,7 @@ export default new class extends Client {
 ## Options
 There are some options offer to config. You can init them in constructor or as an option when exec a restful method.
 
-```json
+```js
 {
     //  the request headers
     headers: {}

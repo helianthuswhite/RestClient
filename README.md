@@ -1,4 +1,7 @@
 # RestClient
+![build](https://travis-ci.org/helianthuswhite/RestClient.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/helianthuswhite/RestClient/badge.svg?branch=master)](https://coveralls.io/github/helianthuswhite/RestClient?branch=master)
+
 Restful HTTP Client for broswer.
 
 ## Installation

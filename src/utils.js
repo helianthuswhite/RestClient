@@ -19,7 +19,7 @@ export const parseHeaders = (headers) => {
         headers.split('\n').forEach((line) => {
             const i = line.indexOf(':');
             const key = line.substr(0, i).trim().toLowerCase();
-            const val = line.substr(i + 1);
+            const val = line.substr(i + 1).trim();
 
             if (key) {
                 if (parsed[key] && ignoreDuplicateOf.indexOf(key)) {

@@ -1,8 +1,15 @@
 {
-    "presets": [
-        ["env", {
-            "modules": false
-        }]
-    ],
-    "plugins": ["external-helpers", "transform-decorators-legacy"]
+    "env": {
+        "test": {
+            "presets": ["env", "stage-2"]
+        },
+        "rollup": {
+            "presets": [
+                ["env", {
+                    "modules": false
+                }]
+            ],
+            "plugins": ["external-helpers", "transform-decorators-legacy"]
+        }
+    }
 }

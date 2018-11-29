@@ -3,6 +3,7 @@ test
 demo
 docs
 website
+coverage
 node_modules
 rollup.config.js
 .babelrc

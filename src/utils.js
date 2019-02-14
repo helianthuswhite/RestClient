@@ -22,7 +22,7 @@ export const parseHeaders = (headers) => {
             const val = line.substr(i + 1).trim();
 
             if (key) {
-                if (parsed[key] && ignoreDuplicateOf.indexOf(key)) {
+                if (parsed[key] && ignoreDuplicateOf.indexOf(key) > -1) {
                     return;
                 }
                 if (key === 'set-cookie') {

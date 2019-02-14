@@ -6,15 +6,24 @@ describe('Testing utils', () => {
         const headerString = `
             Content-Type: application/json
             Cache-Control: true
+            Set-Cookie: cetest
+            Set-Cookie: cetest2
+            Age: 100
             X-Request-By: RestClient
+            Age: 10
         `;
         const headers = {
             'content-type': 'application/json',
-            'cache-control': "true",
-            'x-request-by': 'RestClient'
+            'cache-control': 'true',
+            'x-request-by': 'RestClient',
+            'set-cookie': ['cetest', 'cetest2'],
+            'age': '100'
         };
         const parsed = utils.parseHeaders(headerString);
         expect(parsed).toEqual(headers);
+
+        const parsedEmpty = utils.parseHeaders();
+        expect(parsedEmpty).toEqual({});
     });
 
     test('extend objects and return a new object ', () => {
@@ -47,6 +56,7 @@ describe('Testing utils', () => {
         };
         const query = '?a=1&b=test';
         expect(utils.getQuery(obj)).toBe(query);
+        expect(utils.getQuery()).toBe('');
     });
 
     test('generateRequestId is to generate a random uuid of the request ', () => {

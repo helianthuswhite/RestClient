@@ -31,6 +31,7 @@
     "eslint": "^5.9.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "faux-jax": "^5.0.6",
     "jest": "^23.6.0",
     "regenerator-runtime": "^0.13.1",
     "rollup": "^0.63.4",

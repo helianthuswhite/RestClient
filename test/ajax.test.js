@@ -1,8 +1,13 @@
+import fauxJax from 'faux-jax';
 import Ajax from '../src/ajax';
 
 describe('Testing Ajax Class', () => {
 
-    const ajax = new Ajax({});
+    const ajax = new Ajax({url: '/test'});
+
+    beforeEach(() => fauxJax.install());
+
+    afterEach(() => fauxJax.restore());
 
     test('Ajax instance should have config property and tow Plugins', () => {
         expect(ajax.hasOwnProperty('config')).toBe(true);
@@ -10,8 +15,84 @@ describe('Testing Ajax Class', () => {
         expect(typeof ajax.res).toBe('object');
     });
 
+    test('Ajax instance receive a config or empty object', () => {
+        expect(ajax.config).toEqual({url: '/test'});
+
+        const ajax2 = new Ajax();
+        expect(ajax2.config).toEqual({});
+    });
+
     test('new Ajax().request should return a promise', () => {
         expect(ajax.request()  instanceof Promise).toBe(true);
+    });
+
+    test('Ajax method will be convert to lowercase and default get', async () => {
+        fauxJax.on('request', request => {
+            expect(request.requestMethod.toLowerCase()).toBe('get');
+
+            request.respond(200);
+        });
+        await ajax.request();
+    });
+
+    test('Option.responseType can set xhr.responseType', async () => {
+        fauxJax.on('request', request => {
+            request.respond(200, {'content-type': 'application/text'}, '123');
+        });
+        const data = await ajax.request({responseType: 'text'});
+        expect(data).toBe('123');
+    });
+
+    test('Option.headers can add headers to the request', async () => {
+        fauxJax.on('request', request => {
+            expect(request.requestHeaders['content-type']).toBeUndefined();
+            request.respond(200);
+        });
+
+        const options = {
+            headers: {
+                'content-type': 'json'
+            },
+            method: 'post'
+        };
+        await ajax.request(options);
+    });
+
+    test('Option.headers can add headers to the request', async () => {
+
+        fauxJax.on('request', request => {
+            expect(request.requestBody).toBe('aaa');
+            request.respond(200);
+        });
+
+        const options = {
+            method: 'post',
+            data: 'aaa'
+        };
+        await ajax.request(options);
+    });
+
+    test('Option.onXXXProgress can add a listener of progress event', async () => {
+        fauxJax.on('request', request => {
+            request.respond(200);
+        });
+
+        const options = {
+            onUploadProgress: () => {},
+            onDownloadProgress: () => {}
+        };
+        await ajax.request(options);
+    });
+
+    test('Option.withCredentials allows request with credentials', async () => {
+        fauxJax.on('request', request => {
+            request.respond(200);
+        });
+
+        const options = {
+            withCredentials: true
+        };
+        await ajax.request(options);
     });
 
 });

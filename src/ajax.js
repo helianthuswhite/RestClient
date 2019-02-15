@@ -41,6 +41,8 @@ export default class Ajax {
 
             options.method = options.method ? options.method.toLowerCase() : 'get';
 
+            options.headers = options.headers || {};
+
             //  set validateStatus function
             options.validateStatus = options.validateStatus
                 || (status => status >= 200 && status < 300);
@@ -129,13 +131,7 @@ export default class Ajax {
 
             // Add responseType to request if needed
             if (options.responseType) {
-                try {
-                    xhr.responseType = options.responseType;
-                } catch (e) {
-                    if (options.responseType !== 'json') {
-                        throw e;
-                    }
-                }
+                xhr.responseType = options.responseType;
             }
 
             // Send the request

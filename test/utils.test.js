@@ -10,12 +10,13 @@ describe('Testing utils', () => {
             Set-Cookie: cetest2
             Age: 100
             X-Request-By: RestClient
+            X-Request-By: XMLHttpRequest
             Age: 10
         `;
         const headers = {
             'content-type': 'application/json',
             'cache-control': 'true',
-            'x-request-by': 'RestClient',
+            'x-request-by': 'RestClient, XMLHttpRequest',
             'set-cookie': ['cetest', 'cetest2'],
             'age': '100'
         };
@@ -29,6 +30,7 @@ describe('Testing utils', () => {
     test('extend objects and return a new object ', () => {
         const a = {a: 1};
         const b = {b: 2};
+        b.__proto__.c = 3;
         const dest = {a: 1, b: 2};
         expect(utils.extend(a, b)).toEqual(dest);
     });

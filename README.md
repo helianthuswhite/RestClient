@@ -136,7 +136,7 @@ There are some options offer to config. You can init them in constructor or as a
 
 **Plugins execute in order.**
 
-The plugin is the most important part of restclient. It makes it easy to extends our api requester, particularly in complicated WebApps. And it’s coupling with business is very low, therefore easy to be changed and replaced.
+The plugin is the most important part of restclient. It makes it easy to extends our api requester, particularly in complicated WebApps. And it's coupling with business is very low, therefore easy to be changed and replaced.
 
 Example we have used several customized plugins in BaiduCloud.
 

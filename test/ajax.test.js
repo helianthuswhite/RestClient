@@ -62,11 +62,19 @@ describe('Testing Ajax Class', () => {
 
         fauxJax.on('request', request => {
             expect(request.requestBody).toBe('aaa');
+            try {
+                const headers = JSON.parse(request.requestHeaders);
+                expect(headers['x-request-by']).toBe('restclient');
+            }
+            catch (error) {}
             request.respond(200);
         });
 
         const options = {
             method: 'post',
+            headers: {
+                'x-request-by': 'restclient'
+            },
             data: 'aaa'
         };
         await ajax.request(options);
@@ -93,6 +101,60 @@ describe('Testing Ajax Class', () => {
             withCredentials: true
         };
         await ajax.request(options);
+    });
+
+    test('Option.validateStatus is a function to filter response status', async () => {
+        fauxJax.on('request', request => {
+            request.respond(400, {}, 'a');
+        });
+
+        const options = {
+            validateStatus: status => status === 200
+        };
+        try {
+            await ajax.request(options);
+        }
+        catch (e) {
+            expect(e).toBe('a');
+        }
+    });
+
+    // test('Aborted request will throw an error', async () => {
+    //     fauxJax.on('request', request => {
+    //         request.respond(200);
+    //     });
+
+    //     try {
+    //         const res = await ajax.request();
+    //         res.xhr.abort();
+    //     }
+    //     catch (e) {
+    //         expect(e instanceof Error).toBe(true);
+    //     }
+    // });
+
+    // test('Request error will throw an error', async () => {
+    //     fauxJax.on('request', request => {
+    //         console.log(request);
+    //         request.respond(200);
+    //     });
+
+    //     try {
+    //         await ajax.request();
+    //     }
+    //     catch (e) {
+    //         expect(e instanceof Error).toBe(true);
+    //     }
+    // });
+
+    test('Request timeout will throw an error', async () => {
+        fauxJax.on('request', r => {});
+        try {
+            await ajax.request({timeout: 1000});
+        }
+        catch (e) {
+            // expect(e instanceof Error).toBe(true);
+        }
     });
 
 });

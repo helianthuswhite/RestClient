@@ -1,6 +1,6 @@
 {
   "name": "@baiducloud/restclient",
-  "version": "1.0.2-alpha",
+  "version": "1.0.1-beta",
   "description": "Restful HTTP Client for broswer.",
   "main": "index.js",
   "scripts": {

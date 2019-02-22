@@ -1,10 +1,10 @@
 {
   "name": "@baiducloud/restclient",
-  "version": "1.0.1-beta",
+  "version": "1.0.4-beta",
   "description": "Restful HTTP Client for broswer.",
   "main": "index.js",
   "scripts": {
-    "build": "rollup -c rollup.config.js",
+    "build": "NODE_ENV=prod rollup -c rollup.config.js",
     "test": "jest --config=jest.config.js --coverage",
     "coveralls": "cat coverage/lcov.info | coveralls"
   },
@@ -37,7 +37,6 @@
     "rollup": "^0.63.4",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-eslint": "^5.0.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-uglify": "^6.0.0"
+    "rollup-plugin-node-resolve": "^3.3.0"
   }
 }

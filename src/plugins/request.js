@@ -10,9 +10,8 @@ import * as utils from '../utils';
 export default () => (req, next) => {
     //  set default request headers
     req.headers = req.headers || {};
-    req.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
 
-    if (utils.isObject(req.data)) {
+    if (utils.isObject(req.data) && !(req.data instanceof FormData)) {
         req.headers['Content-Type'] = 'application/json;charset=utf-8';
         req.data = JSON.stringify(req.data);
     }

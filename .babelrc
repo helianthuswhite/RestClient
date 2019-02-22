@@ -14,7 +14,7 @@
                 ]
             ]
         },
-        "rollup": {
+        "prod": {
             "presets": [
                 ["env", {
                     "modules": false

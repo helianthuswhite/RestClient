@@ -9,3 +9,6 @@ rollup.config.js
 .babelrc
 .editorconfig
 .eslintrc.js
+src
+jest.config.js
+.travis.yml

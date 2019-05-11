@@ -424,44 +424,60 @@ define(function () { 'use strict';
 
           var _this = possibleConstructorReturn(this, (Client.__proto__ || Object.getPrototypeOf(Client)).call(this, config));
 
-          _this.initMethods();
-
           _this.req.use(requestPlugin());
           _this.res.use(responsePlugin());
           return _this;
       }
 
       createClass(Client, [{
-          key: 'initMethods',
-          value: function initMethods() {
-              var _this2 = this;
+          key: 'get',
+          value: function get$$1(url, data) {
+              var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-              ['post', 'put'].forEach(function (item) {
-                  _this2[item] = function (url, data) {
-                      var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+              var options = extend({
+                  url: url + getQuery(data),
+                  method: 'get'
+              }, config);
 
-                      var options = extend({
-                          url: url,
-                          data: data,
-                          method: item
-                      }, config);
+              return this.request(options);
+          }
+      }, {
+          key: 'delete',
+          value: function _delete(url, data) {
+              var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-                      return _this2.request(options);
-                  };
-              });
+              var options = extend({
+                  url: url + getQuery(data),
+                  method: 'delete'
+              }, config);
 
-              ['get', 'delete'].forEach(function (item) {
-                  _this2[item] = function (url, data) {
-                      var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+              return this.request(options);
+          }
+      }, {
+          key: 'post',
+          value: function post(url, data) {
+              var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-                      var options = extend({
-                          url: url + getQuery(data),
-                          method: item
-                      }, config);
+              var options = extend({
+                  url: url,
+                  data: data,
+                  method: 'post'
+              }, config);
 
-                      return _this2.request(options);
-                  };
-              });
+              return this.request(options);
+          }
+      }, {
+          key: 'put',
+          value: function put(url, data) {
+              var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+              var options = extend({
+                  url: url,
+                  data: data,
+                  method: 'put'
+              }, config);
+
+              return this.request(options);
           }
       }]);
       return Client;

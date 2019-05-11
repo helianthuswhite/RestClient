@@ -14,34 +14,45 @@ export default class Client extends Ajax {
     constructor(config) {
         super(config);
 
-        this.initMethods();
-
         this.req.use(requestPlugin());
         this.res.use(responsePlugin());
     }
 
-    initMethods() {
-        ['post', 'put'].forEach((item) => {
-            this[item] = (url, data, config = {}) => {
-                const options = utils.extend({
-                    url,
-                    data,
-                    method: item
-                }, config);
+    get(url, data, config = {}) {
+        const options = utils.extend({
+            url: url + utils.getQuery(data),
+            method: 'get'
+        }, config);
 
-                return this.request(options);
-            };
-        });
+        return this.request(options);
+    }
 
-        ['get', 'delete'].forEach((item) => {
-            this[item] = (url, data, config = {}) => {
-                const options = utils.extend({
-                    url: url + utils.getQuery(data),
-                    method: item
-                }, config);
+    delete(url, data, config = {}) {
+        const options = utils.extend({
+            url: url + utils.getQuery(data),
+            method: 'delete'
+        }, config);
 
-                return this.request(options);
-            };
-        });
+        return this.request(options);
+    }
+
+    post(url, data, config = {}) {
+        const options = utils.extend({
+            url,
+            data,
+            method: 'post'
+        }, config);
+
+        return this.request(options);
+    }
+
+    put(url, data, config = {}) {
+        const options = utils.extend({
+            url,
+            data,
+            method: 'put'
+        }, config);
+
+        return this.request(options);
     }
 }

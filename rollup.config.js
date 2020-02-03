@@ -1,20 +1,23 @@
 // rollup.config.js
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
-import {eslint} from 'rollup-plugin-eslint';
+import typescript from 'rollup-plugin-typescript';
 
 export default {
-    input: 'src/client.js',
+    input: 'src/main.ts',
     output: {
-        file: 'index.js',
-        format: 'amd'
+        file: 'dist/index.js',
+        name: 'RestClient',
+        format: 'umd',
+        sourcemap: true
     },
     plugins: [
-        resolve(),
-        eslint({
-            exclude: 'node_modules/**'
+        typescript(),
+        resolve({
+            extensions: ['.js', '.jsx', '.ts', '.tsx']
         }),
         babel({
+            extensions: ['.js', '.jsx', '.ts', '.tsx'],
             exclude: 'node_modules/**' // 只编译我们的源代码
         })
     ]

@@ -5,7 +5,9 @@
  * @author helianthuswhite(hyz19960229@gmail.com)
  */
 
-export default () => (res, next) => {
+import { Options } from 'ajax';
+
+export default (): Function => (res: Options, next: Function): void => {
     if (typeof res.data === 'string') {
         try {
             res.data = JSON.parse(res.data);

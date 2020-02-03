@@ -14,7 +14,7 @@ Basic use as a post method.
 
 ```js
 
-import Client from '@baiducloud/restclient';
+import {Client} from '@baiducloud/restclient';
 
 const client = new Client();
 const params = {
@@ -34,7 +34,7 @@ client.post('/api/test', params, options).then(data => {
 Use as a base Class to extended in ES6.
 
 ```js
-import Client from '@baiducloud/restclient';
+import {Client} from '@baiducloud/restclient';
 
 export default new class extends Client {
     constructor() {
@@ -55,7 +55,9 @@ export default new class extends Client {
 Build your own plugins to handle request and response.
 
 ```js
-import Client from '@baiducloud/restclient';
+import {Client, decorators} from '@baiducloud/restclient';
+
+const {use, retry} = decorators;
 
 const requestPlugin = region => (req, next) => {
     req.region = region || {};
@@ -73,18 +75,17 @@ const responsePlugin = () => (res, next) => {
     next();
 };
 
-export default new class extends Client {
-    constructor() {
-        super();
+@use('request', requestPlugin())
+@use('response', responsePlugin())
+class TestClient extends Client {
 
-        this.req.use(requestPlugin());
-        this.res.use(responsePlugin());
-    }
-
+    @retry()
     getList(params) {
         this.get('/api/getList', params);
     }
 }
+
+export default new TestClient();
 ```
 
 ## Options
@@ -116,8 +117,8 @@ There are some options offer to config. You can init them in constructor or as a
     //  a function to handle the upload progress event
     onUploadProgress: null
 
-    /**  
-        next three options can alse be set in options, 
+    /**
+        next three options can alse be set in options,
         but it's not a good practice to do this instead of using restful methods.
     **/
 
@@ -131,6 +132,13 @@ There are some options offer to config. You can init them in constructor or as a
     data: *
 }
 ```
+
+## Decorators
+RestClient expect the developer to use decorators to extend the client. And there also provide some decorators inside.
+
+- use - Use plugins for a class or a method
+- retry - Provide the retry function
+- timeout - Provide the timeout function
 
 ## Plugins
 
@@ -149,7 +157,7 @@ Example we have used several customized plugins in BaiduCloud.
 - monitor plugin to collect requests infos.
 
 
-RestClient has two plugin queues, respectively are the request queue as `req` property and  the response queue as `res` property. 
+RestClient has two plugin queues, respectively are the request queue as `req` property and  the response queue as `res` property.
 
 The default request plugin:
 ```js
@@ -195,18 +203,18 @@ You can handle the request or the response in your plugin, but remember to exec 
 In the end, you need to use your plugin by `client.req|res.use()` method.
 
 ```js
-import Client from '@baiducloud/restclient';
+import {Client} from '@baiducloud/restclient';
 
 const client = new Client();
 
-client.req.use((req, next) => {
+client.requestPlugins.push((req, next) => {
     //  handle request
 
     //  remember next()
     next();
 });
 
-client.res.use((res, next) => {
+client.responsePlugins.push((res, next) => {
     //  handle response
 
     //  remember next()
@@ -225,7 +233,7 @@ Plugin offers some apis for handle plugins more convenient.
 RestClient offers four Restful methods as `get`、`put`、`post`、`delete`. And the api returns a Promise.
 
 ```js
-client.get|post|put|delete(url, data, options);
+client.get|post|put|patch|head|delete(url, data, options);
 ```
 
 It also supports to add method by using `request` method in prototype.

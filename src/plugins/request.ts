@@ -5,9 +5,10 @@
  * @author helianthuswhite(hyz19960229@gmail.com)
  */
 
+import { Options } from 'ajax';
 import * as utils from '../utils';
 
-export default () => (req, next) => {
+export default (): Function => (req: Options, next: Function): void => {
     //  set default request headers
     req.headers = req.headers || {};
 

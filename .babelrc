@@ -1,26 +1,21 @@
 {
     "env": {
         "test": {
-            "presets": ["env", "stage-2"],
+            "presets": ["@babel/preset-env"],
             "plugins": [
-                [
-                    "transform-runtime",
-                    {
-                        "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
-                    }
-                ]
+                "@babel/plugin-transform-runtime",
+                ["@babel/plugin-proposal-decorators", {"legacy": true}]
             ]
         },
         "prod": {
             "presets": [
-                ["env", {
-                    "modules": false
-                }]
+                ["@babel/preset-env", {"useBuiltIns": "entry"}],
+                "@babel/preset-typescript"
             ],
-            "plugins": ["external-helpers", "transform-decorators-legacy"]
+            "plugins": [
+                ["@babel/plugin-proposal-decorators", {"legacy": true}],
+                "@babel/plugin-proposal-class-properties"
+            ]
         }
     }
 }

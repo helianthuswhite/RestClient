@@ -115,7 +115,6 @@ export const promiseRace: PromiseRace = async (promise: Function, n: number) => 
             }
         }
     }
-    return Promise.resolve({});
 };
 
 export const getPlugins: GetPlugins = (base: Array<Function>, extra: Array<MethodPlugin>) => {

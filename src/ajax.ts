@@ -44,7 +44,7 @@ export default class Ajax {
      *
      * @return {meta.requseter}
      */
-    request(config: Options = {method: 'GET', url: ''}): Promise<any> {
+    request(config: Options): Promise<any> {
         const current = this.__current || 'get';
         const currentRequestPlugins = this[`${current}requestPlugins`] || [];
         const currentResponsePlugins = this[`${current}responsePlugins`] || [];
@@ -84,7 +84,7 @@ export default class Ajax {
                 responseHandler.handle(response);
             };
 
-            const options = utils.extend(this.config, config) as Options;
+            const options = utils.extend({method: 'GET', url: ''}, this.config, config) as Options;
 
             options.headers = options.headers || {};
 
@@ -143,16 +143,7 @@ export default class Ajax {
 
             // Add responseType to request if needed
             if (options.responseType) {
-                try {
-                    xhr.responseType = options.responseType;
-                } catch (e) {
-                    // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-                    // But, this can be suppressed for 'json' type as it can be parsed
-                    // by default 'transformResponse' function.
-                    if (options.responseType !== 'json') {
-                        throw e;
-                    }
-                }
+                xhr.responseType = options.responseType;
             }
 
             // Handle progress if needed

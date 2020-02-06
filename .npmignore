@@ -6,6 +6,7 @@ website
 coverage
 node_modules
 rollup.config.js
+rollup.dev.config.js
 .babelrc
 .editorconfig
 .eslintrc.js

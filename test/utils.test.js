@@ -74,5 +74,14 @@ describe('Testing utils', () => {
         expect(utils.getUTCTime(new Date())).toMatch(/T|Z/g);
         expect(() => utils.getUTCTime(1)).toThrow();
     });
-    
+
+    test('promiseRace method hacks the promise.race methd ', () => {
+        expect(utils.promiseRace(() => Promise.resolve({}), 2) instanceof Promise).toBe(true);
+        expect(utils.promiseRace(() => Promise.reject({}), 2) instanceof Promise).toBe(true);
+    });
+
+    test('getPlugins method merge the instance plugins and the method plugins ', () => {
+        expect(utils.getPlugins([], []).length).toBe(0);
+    });
+
 });

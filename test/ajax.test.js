@@ -11,19 +11,19 @@ describe('Testing Ajax Class', () => {
 
     test('Ajax instance should have config property and tow Plugins', () => {
         expect(ajax.hasOwnProperty('config')).toBe(true);
-        expect(typeof ajax.req).toBe('object');
-        expect(typeof ajax.res).toBe('object');
+        expect(typeof ajax.requestPlugins).toBe('object');
+        expect(typeof ajax.responsePlugins).toBe('object');
     });
 
     test('Ajax instance receive a config or empty object', () => {
         expect(ajax.config).toEqual({url: '/test'});
 
         const ajax2 = new Ajax();
-        expect(ajax2.config).toEqual({});
+        expect(ajax2.config).toEqual(undefined);
     });
 
     test('new Ajax().request should return a promise', () => {
-        expect(ajax.request()  instanceof Promise).toBe(true);
+        expect(ajax.request() instanceof Promise).toBe(true);
     });
 
     test('Ajax method will be convert to lowercase and default get', async () => {
@@ -118,34 +118,6 @@ describe('Testing Ajax Class', () => {
             expect(e).toBe('a');
         }
     });
-
-    // test('Aborted request will throw an error', async () => {
-    //     fauxJax.on('request', request => {
-    //         request.respond(200);
-    //     });
-
-    //     try {
-    //         const res = await ajax.request();
-    //         res.xhr.abort();
-    //     }
-    //     catch (e) {
-    //         expect(e instanceof Error).toBe(true);
-    //     }
-    // });
-
-    // test('Request error will throw an error', async () => {
-    //     fauxJax.on('request', request => {
-    //         console.log(request);
-    //         request.respond(200);
-    //     });
-
-    //     try {
-    //         await ajax.request();
-    //     }
-    //     catch (e) {
-    //         expect(e instanceof Error).toBe(true);
-    //     }
-    // });
 
     test('Request timeout will throw an error', async () => {
         fauxJax.on('request', r => {});

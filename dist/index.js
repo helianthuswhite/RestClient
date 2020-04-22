@@ -1059,9 +1059,6 @@
               break;
 
             case 15:
-              return _context.abrupt("return", Promise.resolve({}));
-
-            case 16:
             case "end":
               return _context.stop();
           }
@@ -1112,13 +1109,9 @@
 
     _createClass(Ajax, [{
       key: "request",
-      value: function request() {
+      value: function request(config) {
         var _this = this;
 
-        var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
-          method: 'GET',
-          url: ''
-        };
         var current = this.__current || 'get';
         var currentRequestPlugins = this["".concat(current, "requestPlugins")] || [];
         var currentResponsePlugins = this["".concat(current, "responsePlugins")] || [];
@@ -1153,7 +1146,10 @@
             responseHandler.handle(response);
           };
 
-          var options = extend(_this.config, config);
+          var options = extend({
+            method: 'GET',
+            url: ''
+          }, _this.config, config);
           options.headers = options.headers || {};
 
           if (options.validateStatus) {
@@ -1207,16 +1203,7 @@
 
 
           if (options.responseType) {
-            try {
-              xhr.responseType = options.responseType;
-            } catch (e) {
-              // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-              // But, this can be suppressed for 'json' type as it can be parsed
-              // by default 'transformResponse' function.
-              if (options.responseType !== 'json') {
-                throw e;
-              }
-            }
+            xhr.responseType = options.responseType;
           } // Handle progress if needed
 
 
@@ -1448,9 +1435,10 @@
   var retry$1 = plugins.retry;
   /* eslint-disable arrow-body-style */
 
-  var retry$2 = (function (condition) {
-    var times = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
-    var timeout$1 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5 * 1000;
+  var retry$2 = (function () {
+    var times = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 2;
+    var timeout$1 = arguments.length > 1 ? arguments[1] : undefined;
+    var condition = arguments.length > 2 ? arguments[2] : undefined;
     return function (target, key, descriptor) {
       timeout(timeout$1)(target, key, descriptor);
       use('response', retry$1(condition, times), 1)(target, key, descriptor);

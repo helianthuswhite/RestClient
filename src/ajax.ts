@@ -59,9 +59,11 @@ export default class Ajax {
             const resultHandler = (xhr: XMLHttpRequest, opt: Options): void => {
                 // Prepare the response
                 const responseHeaders = utils.parseHeaders(xhr.getAllResponseHeaders());
+                const responseData = !options.responseType || options.responseType === 'text' ||  options.responseType === 'json'
+                    ? xhr.responseText : xhr.response;
 
                 const response: Response = {
-                    data: xhr.responseText,
+                    data: responseData,
                     status: xhr.status === 1223 ? 204 : xhr.status,
                     statusText: xhr.status === 1223 ? 'No Content' : xhr.statusText,
                     headers: responseHeaders,

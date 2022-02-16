@@ -21,6 +21,24 @@
     var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
     var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
 
+    function define(obj, key, value) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+      return obj[key];
+    }
+    try {
+      // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+      define({}, "");
+    } catch (err) {
+      define = function(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+
     function wrap(innerFn, outerFn, self, tryLocsList) {
       // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
       var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
@@ -73,9 +91,9 @@
     // This is a polyfill for %IteratorPrototype% for environments that
     // don't natively support it.
     var IteratorPrototype = {};
-    IteratorPrototype[iteratorSymbol] = function () {
+    define(IteratorPrototype, iteratorSymbol, function () {
       return this;
-    };
+    });
 
     var getProto = Object.getPrototypeOf;
     var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
@@ -89,18 +107,22 @@
 
     var Gp = GeneratorFunctionPrototype.prototype =
       Generator.prototype = Object.create(IteratorPrototype);
-    GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-    GeneratorFunctionPrototype.constructor = GeneratorFunction;
-    GeneratorFunctionPrototype[toStringTagSymbol] =
-      GeneratorFunction.displayName = "GeneratorFunction";
+    GeneratorFunction.prototype = GeneratorFunctionPrototype;
+    define(Gp, "constructor", GeneratorFunctionPrototype);
+    define(GeneratorFunctionPrototype, "constructor", GeneratorFunction);
+    GeneratorFunction.displayName = define(
+      GeneratorFunctionPrototype,
+      toStringTagSymbol,
+      "GeneratorFunction"
+    );
 
     // Helper for defining the .next, .throw, and .return methods of the
     // Iterator interface in terms of a single ._invoke method.
     function defineIteratorMethods(prototype) {
       ["next", "throw", "return"].forEach(function(method) {
-        prototype[method] = function(arg) {
+        define(prototype, method, function(arg) {
           return this._invoke(method, arg);
-        };
+        });
       });
     }
 
@@ -119,9 +141,7 @@
         Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
       } else {
         genFun.__proto__ = GeneratorFunctionPrototype;
-        if (!(toStringTagSymbol in genFun)) {
-          genFun[toStringTagSymbol] = "GeneratorFunction";
-        }
+        define(genFun, toStringTagSymbol, "GeneratorFunction");
       }
       genFun.prototype = Object.create(Gp);
       return genFun;
@@ -135,7 +155,7 @@
       return { __await: arg };
     };
 
-    function AsyncIterator(generator) {
+    function AsyncIterator(generator, PromiseImpl) {
       function invoke(method, arg, resolve, reject) {
         var record = tryCatch(generator[method], generator, arg);
         if (record.type === "throw") {
@@ -146,14 +166,14 @@
           if (value &&
               typeof value === "object" &&
               hasOwn.call(value, "__await")) {
-            return Promise.resolve(value.__await).then(function(value) {
+            return PromiseImpl.resolve(value.__await).then(function(value) {
               invoke("next", value, resolve, reject);
             }, function(err) {
               invoke("throw", err, resolve, reject);
             });
           }
 
-          return Promise.resolve(value).then(function(unwrapped) {
+          return PromiseImpl.resolve(value).then(function(unwrapped) {
             // When a yielded Promise is resolved, its final value becomes
             // the .value of the Promise<{value,done}> result for the
             // current iteration.
@@ -171,7 +191,7 @@
 
       function enqueue(method, arg) {
         function callInvokeWithMethodAndArg() {
-          return new Promise(function(resolve, reject) {
+          return new PromiseImpl(function(resolve, reject) {
             invoke(method, arg, resolve, reject);
           });
         }
@@ -203,17 +223,20 @@
     }
 
     defineIteratorMethods(AsyncIterator.prototype);
-    AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
       return this;
-    };
+    });
     exports.AsyncIterator = AsyncIterator;
 
     // Note that simple async functions are implemented on top of
     // AsyncIterator objects; they just return a Promise for the value of
     // the final result produced by the iterator.
-    exports.async = function(innerFn, outerFn, self, tryLocsList) {
+    exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+      if (PromiseImpl === void 0) PromiseImpl = Promise;
+
       var iter = new AsyncIterator(
-        wrap(innerFn, outerFn, self, tryLocsList)
+        wrap(innerFn, outerFn, self, tryLocsList),
+        PromiseImpl
       );
 
       return exports.isGeneratorFunction(outerFn)
@@ -388,20 +411,20 @@
     // unified ._invoke helper method.
     defineIteratorMethods(Gp);
 
-    Gp[toStringTagSymbol] = "Generator";
+    define(Gp, toStringTagSymbol, "Generator");
 
     // A Generator should always return itself as the iterator object when the
     // @@iterator function is called on it. Some browsers' implementations of the
     // iterator prototype chain incorrectly implement this, causing the Generator
     // object to not be returned from this call. This ensures that doesn't happen.
     // See https://github.com/facebook/regenerator/issues/274 for more details.
-    Gp[iteratorSymbol] = function() {
+    define(Gp, iteratorSymbol, function() {
       return this;
-    };
+    });
 
-    Gp.toString = function() {
+    define(Gp, "toString", function() {
       return "[object Generator]";
-    };
+    });
 
     function pushTryEntry(locs) {
       var entry = { tryLoc: locs[0] };
@@ -720,14 +743,19 @@
   } catch (accidentalStrictMode) {
     // This module should not be running in strict mode, so the above
     // assignment should always work unless something is misconfigured. Just
-    // in case runtime.js accidentally runs in strict mode, we can escape
+    // in case runtime.js accidentally runs in strict mode, in modern engines
+    // we can explicitly access globalThis. In older engines we can escape
     // strict mode using a global Function call. This could conceivably fail
     // if a Content Security Policy forbids using Function, but in that case
     // the proper solution is to fix the accidental strict mode problem. If
     // you've misconfigured your bundler to force strict mode and applied a
     // CSP to forbid Function, and you're not willing to fix either of those
     // problems, please detail your unique predicament in a GitHub issue.
-    Function("r", "regeneratorRuntime = r")(runtime);
+    if (typeof globalThis === "object") {
+      globalThis.regeneratorRuntime = runtime;
+    } else {
+      Function("r", "regeneratorRuntime = r")(runtime);
+    }
   }
 
   function _classCallCheck(instance, Constructor) {
@@ -783,6 +811,19 @@
     return _setPrototypeOf(o, p);
   }
 
+  function _isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function _assertThisInitialized(self) {
     if (self === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -794,44 +835,78 @@
   function _possibleConstructorReturn(self, call) {
     if (call && (typeof call === "object" || typeof call === "function")) {
       return call;
+    } else if (call !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
     }
 
     return _assertThisInitialized(self);
   }
 
+  function _createSuper(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf(Derived),
+          result;
+
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+
+      return _possibleConstructorReturn(this, result);
+    };
+  }
+
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
   }
 
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   /*! *****************************************************************************
-  Copyright (c) Microsoft Corporation. All rights reserved.
-  Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-  this file except in compliance with the License. You may obtain a copy of the
-  License at http://www.apache.org/licenses/LICENSE-2.0
+  Copyright (c) Microsoft Corporation.
 
-  THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-  WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-  MERCHANTABLITY OR NON-INFRINGEMENT.
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted.
 
-  See the Apache Version 2.0 License for specific language governing permissions
-  and limitations under the License.
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
   ***************************************************************************** */
 
   function __decorate(decorators, target, key, desc) {
@@ -842,10 +917,11 @@
   }
 
   function __awaiter(thisArg, _arguments, P, generator) {
+      function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
       return new (P || (P = Promise))(function (resolve, reject) {
           function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
           function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-          function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+          function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
           step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
   }
@@ -856,9 +932,7 @@
    * @file src/plugin.js
    * @author helianthuswhite(hyz19960229@gmail.com)
    */
-  var _default =
-  /*#__PURE__*/
-  function () {
+  var _default = /*#__PURE__*/function () {
     function _default() {
       var plugins = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
@@ -1019,9 +1093,7 @@
     return query.replace('&', '?');
   };
   var promiseRace = function promiseRace(promise, n) {
-    return __awaiter(void 0, void 0, void 0,
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee() {
+    return __awaiter(void 0, void 0, void 0, /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
       var i;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
@@ -1075,9 +1147,7 @@
     return plugins;
   };
 
-  var Ajax =
-  /*#__PURE__*/
-  function () {
+  var Ajax = /*#__PURE__*/function () {
     function Ajax(config) {
       _classCallCheck(this, Ajax);
 
@@ -1124,8 +1194,9 @@
           var resultHandler = function resultHandler(xhr, opt) {
             // Prepare the response
             var responseHeaders = parseHeaders(xhr.getAllResponseHeaders());
+            var responseData = !options.responseType || options.responseType === 'text' || options.responseType === 'json' ? xhr.responseText : xhr.response;
             var response = {
-              data: xhr.responseText,
+              data: responseData,
               status: xhr.status === 1223 ? 204 : xhr.status,
               statusText: xhr.status === 1223 ? 'No Content' : xhr.statusText,
               headers: responseHeaders,
@@ -1280,9 +1351,7 @@
 
   var retry = (function (condition, times) {
     return function (res, next) {
-      return __awaiter(void 0, void 0, void 0,
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee() {
+      return __awaiter(void 0, void 0, void 0, /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var config, status, ajax, executable;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -1356,28 +1425,27 @@
       var targetPlugins = typeof plugin === 'function' ? [plugin] : _toConsumableArray(plugin);
 
       if (typeof target === 'function') {
-        return (
-          /*#__PURE__*/
-          function (_target) {
-            _inherits(_class, _target);
+        return /*#__PURE__*/function (_target) {
+          _inherits(_class, _target);
 
-            function _class(config) {
-              var _this$pluginType;
+          var _super = _createSuper(_class);
 
-              var _this;
+          function _class(config) {
+            var _this$pluginType;
 
-              _classCallCheck(this, _class);
+            var _this;
 
-              _this = _possibleConstructorReturn(this, _getPrototypeOf(_class).call(this, config));
+            _classCallCheck(this, _class);
 
-              (_this$pluginType = _this[pluginType]).splice.apply(_this$pluginType, [sequence || _this[pluginType].length, 0].concat(_toConsumableArray(targetPlugins)));
+            _this = _super.call(this, config);
 
-              return _this;
-            }
+            (_this$pluginType = _this[pluginType]).splice.apply(_this$pluginType, [sequence || _this[pluginType].length, 0].concat(_toConsumableArray(targetPlugins)));
 
-            return _class;
-          }(target)
-        );
+            return _this;
+          }
+
+          return _class;
+        }(target);
       }
 
       if (target["__".concat(key, "__").concat(pluginType)]) {
@@ -1461,15 +1529,15 @@
       responsePlugin = plugins.response;
   var use$1 = decorators.use;
 
-  var RestClient =
-  /*#__PURE__*/
-  function (_Ajax) {
+  var RestClient = /*#__PURE__*/function (_Ajax) {
     _inherits(RestClient, _Ajax);
+
+    var _super = _createSuper(RestClient);
 
     function RestClient() {
       _classCallCheck(this, RestClient);
 
-      return _possibleConstructorReturn(this, _getPrototypeOf(RestClient).apply(this, arguments));
+      return _super.apply(this, arguments);
     }
 
     _createClass(RestClient, [{

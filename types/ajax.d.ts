@@ -71,5 +71,5 @@ export class Ajax {
      *
      * @return {meta.requseter}
      */
-    request(options?: Options): Promise<unknown>;
+    request(options?: Options): Promise<any>;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@baiducloud/restclient",
+  "name": "web-rest-client",
   "version": "1.0.2",
   "description": "Restful HTTP Client for broswer.",
   "main": "dist/index.js",

@@ -7,14 +7,14 @@ Restful HTTP Client for broswer.
 ## Installation
 Using npm:
 
-    $ npm install @baiducloud/restclient
+    $ npm install web-rest-client
 
 ## Example
 Basic use as a post method.
 
 ```js
 
-import {Client} from '@baiducloud/restclient';
+import {Client} from 'web-rest-client';
 
 const client = new Client();
 const params = {
@@ -34,7 +34,7 @@ client.post('/api/test', params, options).then(data => {
 Use as a base Class to extended in ES6.
 
 ```js
-import {Client} from '@baiducloud/restclient';
+import {Client} from 'web-rest-client';
 
 export default new class extends Client {
     constructor() {
@@ -55,7 +55,7 @@ export default new class extends Client {
 Build your own plugins to handle request and response.
 
 ```js
-import {Client, decorators} from '@baiducloud/restclient';
+import {Client, decorators} from 'web-rest-client';
 
 const {use, retry} = decorators;
 
@@ -203,7 +203,7 @@ You can handle the request or the response in your plugin, but remember to exec 
 In the end, you need to use your plugin by `client.req|res.use()` method.
 
 ```js
-import {Client} from '@baiducloud/restclient';
+import {Client} from 'web-rest-client';
 
 const client = new Client();
 
@@ -239,7 +239,7 @@ client.get|post|put|patch|head|delete(url, data, options);
 It also supports to add method by using `request` method in prototype.
 
 ```js
-import Client from '@baiducloud/restclient';
+import Client from 'web-rest-client';
 
 class extends Client {
     patch(url, data, options) {

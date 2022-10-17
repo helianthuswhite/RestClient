@@ -75,7 +75,7 @@ export const getQuery: GetQuery = (obj: TSObject) => {
     }
 
     Object.keys(obj).forEach((key) => {
-        const str = `&${key}=${obj[key]}`;
+        const str = isUndefined(obj[key]) ? '' : `&${key}=${obj[key]}`;
         query += str;
     });
 
@@ -115,6 +115,8 @@ export const promiseRace: PromiseRace = async (promise: Function, n: number) => 
             }
         }
     }
+
+    return promise();
 };
 
 export const getPlugins: GetPlugins = (base: Array<Function>, extra: Array<MethodPlugin>) => {

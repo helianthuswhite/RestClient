@@ -59,7 +59,9 @@ export default class Ajax {
             const resultHandler = (xhr: XMLHttpRequest, opt: Options): void => {
                 // Prepare the response
                 const responseHeaders = utils.parseHeaders(xhr.getAllResponseHeaders());
-                const responseData = !options.responseType || options.responseType === 'text' ||  options.responseType === 'json'
+                const responseData = !config.responseType
+                    || config.responseType === 'text'
+                    || config.responseType === 'json'
                     ? xhr.responseText : xhr.response;
 
                 const response: Response = {

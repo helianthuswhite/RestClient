@@ -1087,7 +1087,7 @@
     }
 
     Object.keys(obj).forEach(function (key) {
-      var str = "&".concat(key, "=").concat(obj[key]);
+      var str = isUndefined(obj[key]) ? '' : "&".concat(key, "=").concat(obj[key]);
       query += str;
     });
     return query.replace('&', '?');
@@ -1131,6 +1131,9 @@
               break;
 
             case 15:
+              return _context.abrupt("return", promise());
+
+            case 16:
             case "end":
               return _context.stop();
           }
@@ -1194,7 +1197,7 @@
           var resultHandler = function resultHandler(xhr, opt) {
             // Prepare the response
             var responseHeaders = parseHeaders(xhr.getAllResponseHeaders());
-            var responseData = !options.responseType || options.responseType === 'text' || options.responseType === 'json' ? xhr.responseText : xhr.response;
+            var responseData = !config.responseType || config.responseType === 'text' || config.responseType === 'json' ? xhr.responseText : xhr.response;
             var response = {
               data: responseData,
               status: xhr.status === 1223 ? 204 : xhr.status,

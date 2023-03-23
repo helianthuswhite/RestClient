@@ -5,7 +5,7 @@
  * @author helianthuswhite(hyz19960229@gmail.com)
  */
 
-export {Client} from './client';
-export {Ajax} from './ajax';
+export * from './client';
+export * from './ajax';
 export {default as decorators} from './decorators';
 export {default as plugins} from './plugins';

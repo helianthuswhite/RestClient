@@ -37,6 +37,7 @@ export interface Options {
     responseType?: ResponseType,
     withCredentials?: boolean,
     validateStatus?: Function,
+    signal?: AbortSignal,
     onDownloadProgress?: (this: XMLHttpRequest, ev: ProgressEvent<XMLHttpRequestEventTarget>) => any,
     onUploadProgress?: (this: XMLHttpRequestUpload, ev: ProgressEvent<XMLHttpRequestEventTarget>) => any,
     onabort?: ((this: XMLHttpRequest, ev: ProgressEvent<EventTarget>) => any),
@@ -62,6 +63,7 @@ export class Ajax {
      * @param {meta.AjaxOption.Number} options.timeout request timeout
      * @param {meta.AjaxOption.Func} options.validateStatus response validateStatus
      * @param {meta.AjaxOption.String} options.responseType response responseType
+     * @param {meta.AjaxOption.AbortSignal} options.signal abort signal
      * @param {meta.AjaxOption.Bool} options.withCredentials request cors
      * @param {meta.AjaxOption.Func} options.onDownloadProgress download progress
      * @param {meta.AjaxOption.Func} options.onUploadProgress upload progress

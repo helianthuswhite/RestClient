@@ -1169,6 +1169,7 @@
      * @param {meta.AjaxOption.Number} options.timeout request timeout
      * @param {meta.AjaxOption.Func} options.validateStatus response validateStatus
      * @param {meta.AjaxOption.String} options.responseType response responseType
+     * @param {meta.AjaxOption.AbortSignal} options.signal abort signal
      * @param {meta.AjaxOption.Bool} options.withCredentials request cors
      * @param {meta.AjaxOption.Func} options.onDownloadProgress download progress
      * @param {meta.AjaxOption.Func} options.onUploadProgress upload progress
@@ -1288,6 +1289,13 @@
 
           if (typeof options.onUploadProgress === 'function' && xhr.upload) {
             xhr.upload.addEventListener('progress', options.onUploadProgress);
+          } // Abort the request if the signal is aborted
+
+
+          if (options.signal && typeof options.signal.addEventListener === 'function') {
+            options.signal.addEventListener('abort', function () {
+              xhr.abort();
+            });
           } // Send the request
 
 
